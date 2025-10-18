@@ -70,7 +70,7 @@ pipeline {
                  echo "Updating kubeconfig for EKS cluster..."
                  aws eks update-kubeconfig \
                      --region ap-south-1 \
-                     --name boardgame
+                     --name todo-eks-cluster
                  '''
                  }
             }
