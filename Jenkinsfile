@@ -87,10 +87,10 @@ pipeline {
     }
 
     post {
-        //always {
-            //echo "Cleaning up workspace..."
-            //cleanWs()
-        //}
+        always {
+            echo "Cleaning up workspace..."
+            cleanWs()
+        }
         success {
             echo "✅ Deployment successful!"
         }
