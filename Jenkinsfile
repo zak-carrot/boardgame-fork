@@ -43,38 +43,38 @@ pipeline {
             }
         }
 
-        // stage('Deploy to AWS eks') {
-        //     steps {
-        //         withEnv([
-        //             "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
-        //             "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
-        //             "AWS_DEFAULT_REGION=ap-south-1"
-        //         ]) {
-        //         dir('terraform') {
-        //             sh '''
-        //             terraform init -input=false
-        //             terraform apply -auto-approve -input=false
-        //             '''
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('Update Kubeconfig') {
-        //     steps {
-        //         withEnv([
-        //             "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
-        //             "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
-        //             "AWS_DEFAULT_REGION=ap-south-1"
-        //         ]) {
-        //         sh '''
-        //         echo "Updating kubeconfig for EKS cluster..."
-        //         aws eks update-kubeconfig \
-        //             --region ap-south-1 \
-        //             --name boardgame
-        //         '''
-        //         }
-          //  }
-        //} 
+         stage('Deploy to AWS eks') {
+             steps {
+                 withEnv([
+                     "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
+                     "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
+                     "AWS_DEFAULT_REGION=ap-south-1"
+                 ]) {
+                 dir('terraform') {
+                     sh '''
+                     terraform init -input=false
+                     terraform apply -auto-approve -input=false
+                     '''
+                     }
+                 }
+             }
+         }
+         stage('Update Kubeconfig') {
+             steps {
+                 withEnv([
+                     "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
+                     "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
+                     "AWS_DEFAULT_REGION=ap-south-1"
+                 ]) {
+                 sh '''
+                 echo "Updating kubeconfig for EKS cluster..."
+                 aws eks update-kubeconfig \
+                     --region ap-south-1 \
+                     --name boardgame
+                 '''
+                 }
+            }
+        } 
         stage('Deploy App to K8s') {
             steps {
                 sh '''
