@@ -1,24 +1,31 @@
 pipeline {
     agent any
-    tools { maven 'mvn' }
+
+    tools {   
+        maven 'Maven3'
+        jdk 'JDK11'
+    }
+
     environment {
         DOCKERHUB_CREDENTIALS = "docker_hub_cred" // Jenkins credentials ID
         DOCKERHUB_REPO = "jayu3110/boardgame-listing"
         IMAGE_NAME = "boardgame-listing"
-        AWS_CREDS = credentials('aws_access_key')
+        SONARQUBE_ENV = 'MySonarQubeServer' 
     }
 
     stages {
-
-        stage('Checkout Code') {
+        stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/JK00119500/boardgame.git'
+                git branch: 'main',
+                    url: 'https://github.com/JK00119500/boardgame.git'
             }
         }
 
-        stage('Build & Test') {
+        stage('Build') {
             steps {
-                sh 'mvn --version && java --version && chmod +x ./mvnw && mvn -N wrapper:wrapper && ./mvnw clean package'
+                sh '''
+                mvn clean install -DSkipTests
+                '''
             }
         }
 
@@ -43,59 +50,35 @@ pipeline {
             }
         }
 
-        // stage('Deploy to AWS eks') {
-            // steps {
-                // withEnv([
-                    // "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
-                    // "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
-                    // "AWS_DEFAULT_REGION=ap-south-1"
-                // ]) {
-                 //dir('terraform') {
-                    // sh '''
-                    // terraform init -input=false
-                    // terraform apply -auto-approve -input=false
-                     //'''
-                    // }
-                 //}
-            // }
-        // }
-        // stage('Update Kubeconfig') {
-            // steps {
-                // withEnv([
-                    // "AWS_ACCESS_KEY_ID=${AWS_CREDS_USR}",
-                    // "AWS_SECRET_ACCESS_KEY=${AWS_CREDS_PSW}",
-                    // "AWS_DEFAULT_REGION=ap-south-1"
-                // ]) {
-                 //sh '''
-                 //echo "Updating kubeconfig for EKS cluster..."
-                 //aws eks update-kubeconfig \
-                     //--region ap-south-1 \
-                     //--name todo-eks-cluster
-                 //'''
-                 //}
-            //}
-        //} 
-        stage('Deploy App to K8s') {
+        stage('SonarQube Analysis') {
             steps {
-                sh '''
-                kubectl apply -f terraform/deployment.yaml --validate=false
-                kubectl apply -f terraform/service.yaml --validate=false
-                '''
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    // sh 'mvn sonar:sonar'
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+                }
             }
         }
 
-    }
-
-    post {
-        always {
-            echo "Cleaning up workspace..."
-            cleanWs()
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
         }
-        success {
-            echo "✅ Deployment successful!"
-        }
-        failure {
-            echo "❌ Deployment failed. Check Jenkins logs."
+        stage('OWASP Dependency-Check Vulnerabilities') {
+            steps {
+            dependencyCheck additionalArguments: ''' 
+                    -o './'
+                    -s './'
+                    -f 'ALL' 
+                    --prettyPrint''', odcInstallation: 'owasp-DC'
+            dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+                
+            }
+            
         }
     }
 }
