@@ -53,7 +53,7 @@ pipeline {
         stage('Trivy scan') {
             steps {
                 sh '''
-          docker run --rm --name trivy-cli \
+                docker run --rm --name trivy-cli \
             -v /var/run/docker.sock:/var/run/docker.sock \
             -v $(which docker):/usr/bin/docker \
             -u root \
@@ -61,10 +61,12 @@ pipeline {
             aquasec/trivy:latest image \
             --format sarif -o trivy-image. \
             ${IMAGE_NAME}
-        '''
-            // --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 \
-      }
+            '''
+        }}
     }
+    
+    
+    
     post {
     always {
       // keep the reports
@@ -109,5 +111,4 @@ pipeline {
         //     }
             
         // }
-    }
 }
