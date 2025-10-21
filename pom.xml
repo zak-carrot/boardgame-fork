@@ -80,6 +80,11 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+    		<dependency>
+    <groupId>org.jacoco</groupId> 
+    <artifactId>jacoco-maven-plugin</artifactId>
+    <version>0.8.7</version>
+</dependency>
 
     <!-- REMOVED: jacoco-maven-plugin from dependencies (it's a plugin) -->
   </dependencies>
