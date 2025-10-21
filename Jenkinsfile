@@ -103,13 +103,14 @@ pipeline {
         }
       }
   }
-    stage('app deploy on eks'){
+        stage('app deploy on eks'){
         steps{
             sshagent(credentials: ['eks_jump_ssh']) {
             
             sh '''
                 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-                ${BASTION_USER}@${BASTION_HOST} 'sudo su && kubectl apply -f /opt/app-files/deployment.yaml'
+                ${BASTION_USER}@${BASTION_HOST} 'sudo su root && whoami && aws eks update-kubeconfig --name todo-eks-cluster-1 --region ap-south-1 --profile jayesh && kubectl apply -f /opt/app-files/deployment.yaml
+                '
                 '''
             }
         }
