@@ -105,10 +105,13 @@ pipeline {
   }
     stage('app deploy on eks'){
         steps{
+            sshagent(credentials: ['eks_jump_ssh']) {
+            
             sh '''
                 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
                 ${BASTION_USER}@${BASTION_HOST} 'kubectl apply -f /opt/app-files/deployment.yaml'
                 '''
             }
         }
+    }
 }}
