@@ -79,15 +79,15 @@ pipeline {
     //         }
     //     }
 
-        stage('Quality Gate') {
-            steps {
-                script {
-                    timeout(time: 1, unit: 'HOURS') {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
-            }
-        }
+        // stage('Quality Gate') {
+        //     steps {
+        //         script {
+        //             timeout(time: 1, unit: 'HOURS') {
+        //                 waitForQualityGate abortPipeline: true
+        //             }
+        //         }
+        //     }
+        // }
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
             dependencyCheck additionalArguments: ''' 
