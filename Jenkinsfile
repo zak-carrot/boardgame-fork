@@ -3,7 +3,7 @@ pipeline {
 
     tools {   
         maven 'Maven3'
-        jdk 'JDK11'
+        jdk 'JDK21'
     }
 
     environment {
@@ -13,8 +13,8 @@ pipeline {
         SONARQUBE_ENV = 'MySonarQubeServer' 
         BASTION_HOST = 'ec2-3-108-53-57.ap-south-1.compute.amazonaws.com'
         BASTION_USER = 'ec2-user'
-        JAVA_HOME = tool(name: 'JDK11', type: 'jdk')
-        PATH = "${JAVA_HOME}/bin:${PATH}"
+        // JAVA_HOME = tool(name: 'JDK11', type: 'jdk')
+        // PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
     stages {
@@ -67,27 +67,27 @@ pipeline {
             '''
         }}
 
-    //     stage('SonarQube Analysis') {
+        stage('SonarQube Analysis') {
     //             tools {
     //     jdk "JDK11"
     // }
-    //         steps {
-    //             withSonarQubeEnv("${SONARQUBE_ENV}") {
-    //                 // sh 'mvn sonar:sonar'
-    //                 sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame' -Dsonar.java.jdkHome=${JAVA_HOME}"
-    //             }
-    //         }
-    //     }
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    // sh 'mvn sonar:sonar'
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+                }
+            }
+        }
 
-        // stage('Quality Gate') {
-        //     steps {
-        //         script {
-        //             timeout(time: 1, unit: 'HOURS') {
-        //                 waitForQualityGate abortPipeline: true
-        //             }
-        //         }
-        //     }
-        // }
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
             dependencyCheck additionalArguments: ''' 

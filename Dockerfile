@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:21-jre
 WORKDIR /app
 ARG JAR=target/database_service_project-0.0.7.jar
 COPY ${JAR} app.jar
