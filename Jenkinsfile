@@ -109,7 +109,7 @@ pipeline {
             
             sh '''
                 ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-                ${BASTION_USER}@${BASTION_HOST} 'kubectl apply -f /opt/app-files/deployment.yaml'
+                ${BASTION_USER}@${BASTION_HOST} 'sudo su && kubectl apply -f /opt/app-files/deployment.yaml'
                 '''
             }
         }
