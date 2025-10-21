@@ -69,12 +69,12 @@ pipeline {
 
         stage('SonarQube Analysis') {
                 tools {
-        jdk "JDK11" // the name you have given the JDK installation in Global Tool Configuration
+        jdk "JDK11"
     }
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     // sh 'mvn sonar:sonar'
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame' -Dsonar.java.jdkHome="${JAVA_HOME}"
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame' -Dsonar.java.jdkHome=${JAVA_HOME}"
                 }
             }
         }
