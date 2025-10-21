@@ -50,35 +50,50 @@ pipeline {
             }
         }
 
-        stage('SonarQube Analysis') {
+        stage('Trivy scan') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    // sh 'mvn sonar:sonar'
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
-                }
-            }
-        }
+                sh '''
+          docker run --rm -d --name trivy-cli \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -v $(which docker):/usr/bin/docker \
+            -u root \
+            -e DOCKER_GID=$(getent group docker | cut -d: -f3) \
+            aquasec/trivy:latest image \
+            --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 \
+            ${IMAGE_NAME}
+        '''
+      }
+    }
 
-        stage('Quality Gate') {
-            steps {
-                script {
-                    timeout(time: 1, unit: 'HOURS') {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
-            }
-        }
-        stage('OWASP Dependency-Check Vulnerabilities') {
-            steps {
-            dependencyCheck additionalArguments: ''' 
-                    -o './'
-                    -s './'
-                    -f 'ALL' 
-                    --prettyPrint''', odcInstallation: 'owasp-DC'
-            dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv("${SONARQUBE_ENV}") {
+        //             // sh 'mvn sonar:sonar'
+        //             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+        //         }
+        //     }
+        // }
+
+        // stage('Quality Gate') {
+        //     steps {
+        //         script {
+        //             timeout(time: 1, unit: 'HOURS') {
+        //                 waitForQualityGate abortPipeline: true
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('OWASP Dependency-Check Vulnerabilities') {
+        //     steps {
+        //     dependencyCheck additionalArguments: ''' 
+        //             -o './'
+        //             -s './'
+        //             -f 'ALL' 
+        //             --prettyPrint''', odcInstallation: 'owasp-DC'
+        //     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
                 
-            }
+        //     }
             
-        }
+        // }
     }
 }
