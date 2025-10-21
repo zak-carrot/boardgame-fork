@@ -65,34 +65,34 @@ pipeline {
     }
 
 
-        // stage('SonarQube Analysis') {
-        //     steps {
-        //         withSonarQubeEnv("${SONARQUBE_ENV}") {
-        //             // sh 'mvn sonar:sonar'
-        //             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
-        //         }
-        //     }
-        // }
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_ENV}") {
+                    // sh 'mvn sonar:sonar'
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+                }
+            }
+        }
 
-        // stage('Quality Gate') {
-        //     steps {
-        //         script {
-        //             timeout(time: 1, unit: 'HOURS') {
-        //                 waitForQualityGate abortPipeline: true
-        //             }
-        //         }
-        //     }
-        // }
-        // stage('OWASP Dependency-Check Vulnerabilities') {
-        //     steps {
-        //     dependencyCheck additionalArguments: ''' 
-        //             -o './'
-        //             -s './'
-        //             -f 'ALL' 
-        //             --prettyPrint''', odcInstallation: 'owasp-DC'
-        //     dependencyCheckPublisher pattern: 'dependency-check-report.xml'
+        stage('Quality Gate') {
+            steps {
+                script {
+                    timeout(time: 1, unit: 'HOURS') {
+                        waitForQualityGate abortPipeline: true
+                    }
+                }
+            }
+        }
+        stage('OWASP Dependency-Check Vulnerabilities') {
+            steps {
+            dependencyCheck additionalArguments: ''' 
+                    -o './'
+                    -s './'
+                    -f 'ALL' 
+                    --prettyPrint''', odcInstallation: 'owasp-DC'
+            dependencyCheckPublisher pattern: 'dependency-check-report.xml'
                 
-        //     }
+            }
             
-        // }
+        }
 }
