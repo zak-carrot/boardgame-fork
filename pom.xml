@@ -85,13 +85,10 @@
     <artifactId>jacoco-maven-plugin</artifactId>
     <version>0.8.7</version>
 </dependency>
-
-    <!-- REMOVED: jacoco-maven-plugin from dependencies (it's a plugin) -->
   </dependencies>
 
   <build>
     <plugins>
-      <!-- Compile for Java 11 with Lombok processor on the classpath -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -108,11 +105,9 @@
         </configuration>
       </plugin>
 
-      <!-- Spring Boot fat-jar repackage -->
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
-        <!-- version comes from spring-boot-starter-parent -->
         <executions>
           <execution>
             <goals>
@@ -120,15 +115,7 @@
             </goals>
           </execution>
         </executions>
-        <!-- Optional: set a deterministic final name -->
-        <!--
-        <configuration>
-          <finalName>app</finalName>
-        </configuration>
-        -->
       </plugin>
-
-      <!-- JaCoCo (plugin only, not a dependency) -->
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

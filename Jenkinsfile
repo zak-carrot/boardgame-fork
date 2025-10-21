@@ -7,14 +7,12 @@ pipeline {
     }
 
     environment {
-        DOCKERHUB_CREDENTIALS = "docker_hub_cred" // Jenkins credentials ID
+        DOCKERHUB_CREDENTIALS = "docker_hub_cred"
         DOCKERHUB_REPO = "jayu3110/boardgame-listing"
         IMAGE_NAME = "boardgame-listing"
         SONARQUBE_ENV = 'MySonarQubeServer' 
         BASTION_HOST = 'ec2-3-108-53-57.ap-south-1.compute.amazonaws.com'
         BASTION_USER = 'ec2-user'
-        // JAVA_HOME = tool(name: 'JDK11', type: 'jdk')
-        // PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
     stages {
@@ -24,7 +22,6 @@ pipeline {
                     url: 'https://github.com/JK00119500/boardgame.git'
             }
         }
-
         stage('Build') {
             steps {
                 sh '''
@@ -32,7 +29,6 @@ pipeline {
                 '''
             }
         }
-
         stage('Build Docker Image') {
             steps {
                 sh "pwd"
@@ -42,7 +38,6 @@ pipeline {
                 sh "docker tag ${IMAGE_NAME}:latest ${DOCKERHUB_REPO}:latest"
             }
         }
-
         stage('Push to Docker Hub') {
             steps {
                 withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
@@ -53,7 +48,6 @@ pipeline {
                 }
             }
         }
-
         stage('Trivy scan') {
             steps {
                 sh '''
@@ -66,28 +60,13 @@ pipeline {
             ${IMAGE_NAME}
             '''
         }}
-
         stage('SonarQube Analysis') {
-    //             tools {
-    //     jdk "JDK11"
-    // }
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    // sh 'mvn sonar:sonar'
                     sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
                 }
             }
         }
-
-        // stage('Quality Gate') {
-        //     steps {
-        //         script {
-        //             timeout(time: 1, unit: 'HOURS') {
-        //                 waitForQualityGate abortPipeline: true
-        //             }
-        //         }
-        //     }
-        // }
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
             dependencyCheck additionalArguments: ''' 
@@ -98,16 +77,16 @@ pipeline {
             dependencyCheckPublisher pattern: 'dependency-check-report.xml'   
             }
         }
-    stage('Sanity: SSH to EKS Jump') {
-      steps {
-        sshagent(credentials: ['eks_jump_ssh']) {
-          sh '''
-            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-              ${BASTION_USER}@${BASTION_HOST} 'hostname && whoami && aws --version || true'
-          '''
-        }
-      }
-  }
+        stage('Sanity: SSH to EKS Jump') {
+            steps {
+                sshagent(credentials: ['eks_jump_ssh']) {
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                    ${BASTION_USER}@${BASTION_HOST} 'hostname && whoami && aws --version || true'
+                    '''
+                    }
+                    }
+                    }
         stage('app deploy on eks'){
         steps{
             sshagent(credentials: ['eks_jump_ssh']) {
