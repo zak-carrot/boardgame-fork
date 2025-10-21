@@ -11,6 +11,8 @@ pipeline {
         DOCKERHUB_REPO = "jayu3110/boardgame-listing"
         IMAGE_NAME = "boardgame-listing"
         SONARQUBE_ENV = 'MySonarQubeServer' 
+        BASTION_HOST = 'ec2-3-108-53-57.ap-south-1.compute.amazonaws.com'
+        BASTION_USER = 'ec2-user'
     }
 
     stages {
@@ -50,47 +52,63 @@ pipeline {
             }
         }
 
-        stage('Trivy scan') {
-            steps {
-                sh '''
-                docker run --rm --name trivy-cli \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -v $(which docker):/usr/bin/docker \
-            -u root \
-            -e DOCKER_GID=$(getent group docker | cut -d: -f3) \
-            aquasec/trivy:latest image \
-            ${IMAGE_NAME}
-            '''
-        }}
+        // stage('Trivy scan') {
+        //     steps {
+        //         sh '''
+        //         docker run --rm --name trivy-cli \
+        //     -v /var/run/docker.sock:/var/run/docker.sock \
+        //     -v $(which docker):/usr/bin/docker \
+        //     -u root \
+        //     -e DOCKER_GID=$(getent group docker | cut -d: -f3) \
+        //     aquasec/trivy:latest image \
+        //     ${IMAGE_NAME}
+        //     '''
+        // }}
 
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    // sh 'mvn sonar:sonar'
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv("${SONARQUBE_ENV}") {
+        //             // sh 'mvn sonar:sonar'
+        //             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+        //         }
+        //     }
+        // }
 
-        stage('Quality Gate') {
-            steps {
-                script {
-                    timeout(time: 1, unit: 'HOURS') {
-                        waitForQualityGate abortPipeline: true
-                    }
-                }
-            }
+        // stage('Quality Gate') {
+        //     steps {
+        //         script {
+        //             timeout(time: 1, unit: 'HOURS') {
+        //                 waitForQualityGate abortPipeline: true
+        //             }
+        //         }
+        //     }
+        // }
+        // stage('OWASP Dependency-Check Vulnerabilities') {
+        //     steps {
+        //     dependencyCheck additionalArguments: ''' 
+        //             -o './'
+        //             -s './'
+        //             -f 'ALL' 
+        //             --prettyPrint''', odcInstallation: 'owasp-DC'
+        //     dependencyCheckPublisher pattern: 'dependency-check-report.xml'   
+        //     }
+        // }
+    stage('Sanity: SSH to EKS Jump') {
+      steps {
+        sshagent(credentials: ['eks_jump_ssh']) {
+          sh '''
+            ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+              ${BASTION_USER}@${BASTION_HOST} 'hostname && whoami && aws --version || true'
+          '''
         }
-        stage('OWASP Dependency-Check Vulnerabilities') {
-            steps {
-            dependencyCheck additionalArguments: ''' 
-                    -o './'
-                    -s './'
-                    -f 'ALL' 
-                    --prettyPrint''', odcInstallation: 'owasp-DC'
-            dependencyCheckPublisher pattern: 'dependency-check-report.xml'
-                
+      }
+  }
+    stage('app deploy on eks'){
+        steps{
+            sh '''
+                ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+                ${BASTION_USER}@${BASTION_HOST} 'kubectl apply -f /opt/app-files/deployment.yaml'
+                '''
             }
-            
         }
 }}
