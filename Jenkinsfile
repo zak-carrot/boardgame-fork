@@ -74,7 +74,7 @@ pipeline {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
                     // sh 'mvn sonar:sonar'
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame' -Dsonar.java.jdkHome="${JAVA_HOME}"
                 }
             }
         }
