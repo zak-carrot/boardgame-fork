@@ -37,7 +37,7 @@ pipeline {
             steps {
                 sh "pwd"
                 sh "ls -lrt"
-                sh "docker build -t ${IMAGE_NAME}:latest ."
+                sh "docker build --no-cache -t ${IMAGE_NAME}:latest ."
                 sh "ls -lrt target"
                 sh "docker tag ${IMAGE_NAME}:latest ${DOCKERHUB_REPO}:latest"
             }
