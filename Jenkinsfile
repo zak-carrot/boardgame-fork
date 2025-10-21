@@ -13,6 +13,8 @@ pipeline {
         SONARQUBE_ENV = 'MySonarQubeServer' 
         BASTION_HOST = 'ec2-3-108-53-57.ap-south-1.compute.amazonaws.com'
         BASTION_USER = 'ec2-user'
+        JAVA_HOME = tool(name: 'JDK11', type: 'jdk')
+        PATH = "${JAVA_HOME}/bin:${PATH}"
     }
 
     stages {
