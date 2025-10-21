@@ -62,8 +62,6 @@ pipeline {
             ${IMAGE_NAME}
             '''
         }}
-    }
-
 
         stage('SonarQube Analysis') {
             steps {
@@ -95,4 +93,4 @@ pipeline {
             }
             
         }
-}
+}}
