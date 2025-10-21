@@ -59,11 +59,25 @@ pipeline {
             -u root \
             -e DOCKER_GID=$(getent group docker | cut -d: -f3) \
             aquasec/trivy:latest image \
+            --format sarif -o trivy-image. \
             ${IMAGE_NAME}
         '''
             // --ignore-unfixed --severity HIGH,CRITICAL --exit-code 1 \
       }
     }
+    post {
+    always {
+      // keep the reports
+      archiveArtifacts artifacts: 'trivy-*.sarif', fingerprint: true
+      script {
+        recordIssues enabledForFailure: true, tools: [
+          sarif(pattern: 'trivy-*.sarif')
+        ]
+      }
+    }
+  }
+
+
 
         // stage('SonarQube Analysis') {
         //     steps {
