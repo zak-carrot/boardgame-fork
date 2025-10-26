@@ -19,7 +19,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/JK00119500/boardgame.git'
+                    url: 'https://github.com/zak-carrot/boardgame-fork.git'
             }
         }
         stage('Build') {
