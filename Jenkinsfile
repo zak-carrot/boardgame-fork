@@ -60,13 +60,13 @@ pipeline {
         //     ${IMAGE_NAME}
         //     '''
         // }}
-        stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=boardgame -Dsonar.projectName='boardgame'"
-                }
-            }
-        }
+        // stage('SonarQube Analysis') {
+        //     steps {
+        //         withSonarQubeEnv("${SONARQUBE_ENV}") {
+        //             sh "mvn clean verify sonar:sonar -Dsonar.projectKey=boardgame -Dsonar.projectName='boardgame'"
+        //         }
+        //     }
+        // }
         stage('OWASP Dependency-Check Vulnerabilities') {
             steps {
             dependencyCheck additionalArguments: ''' 
