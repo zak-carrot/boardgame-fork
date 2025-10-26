@@ -63,7 +63,7 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=Boardgame -Dsonar.projectName='Boardgame'"
+                    sh "mvn clean verify sonar:sonar -Dsonar.projectKey=boardgame -Dsonar.projectName='boardgame'"
                 }
             }
         }
